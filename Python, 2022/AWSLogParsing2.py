@@ -81,9 +81,46 @@ if not(os.path.isfile('oct.txt')):
 
     
 
-r = 'local - - [24/Oct/1994:13:41:41 -0600] "GET index.html HTTP/1.0" 200 150'
-regex = re.compile("(.*?) - - \[(.*?):(.*) .*\] \"[A-Z]{3,6} (.*?) HTTP.*\" (\d{3}) (.+)")
-pieces = re.split(regex, r)
-date = d.datetime.strptime(pieces[2], '%d/%b/%Y')
-print(date)
-print(d.datetime.weekday(date))
+monday = 0
+tuesday = 0
+wednesday = 0
+thursday = 0
+friday = 0
+saturday = 0
+sunday = 0
+count = 0
+regex = re.compile("(.*?) - - \[(.*?):(.*) .*\] \"[A-Z]{3,6} (.*?) HTTP.*\" (\d{3}) (.+)")  
+for i in CoList:
+  pieces = re.split(regex, i)
+  if len(pieces) > 2: #some parts don't have proper requests, so they get this to sift through them
+    count += 1
+    date = d.datetime.strptime(pieces[2], '%d/%b/%Y')
+    day = d.datetime.weekday(date)
+    if day == 0:
+      monday += 1
+    if day == 1:
+      tuesday += 1
+    if day == 2:
+      wednesday += 1
+    if day == 3:
+      thursday += 1
+    if day == 4:
+      friday += 1
+    if day == 5:
+      saturday += 1
+    if day == 6:
+      sunday += 1
+#52 mondays (or any unique day) in a year, but counting numbers down since we aren't doing EXACTLY a year
+monday = monday/50
+tuesday = tuesday/50
+wednesday = wednesday/50
+thursday = thursday/49
+friday = friday/49
+saturday = saturday/49
+sunday = sunday/49
+dayaverage=(monday+tuesday+wednesday+thursday+friday+saturday+sunday)/7
+weekaverage=monday+tuesday+wednesday+thursday+friday+saturday+sunday
+monthaverage = count/12 #being lazy on this one
+print("There is a average of ", dayaverage, " requests for any given day.")
+print("There is a average of ", weekaverage, " requests for any given week.")
+print("There is a average of ", monthaverage, " requests for any given month.")
