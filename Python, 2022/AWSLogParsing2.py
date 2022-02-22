@@ -4,7 +4,6 @@
 #What percentage of the requests were redirected elsewhere (any 3xx codes)?
 #What was the most-requested file?
 #What was the least-requested file?
-# This will be the main file
 import urllib.request
 import os.path
 import re
