@@ -4,23 +4,25 @@
 #What percentage of the requests were redirected elsewhere (any 3xx codes)?
 #What was the most-requested file?
 #What was the least-requested file?
-import re
-import datetime as d
+# This will be the main file
 import urllib.request
 import os.path
-#checks to see if the file exists, if it does NOT exist, download it and countine running.
+import re
+import datetime as d
+
+# Checks to see if the file exists, if it does NOT exist, download it and countine running.
 if not(os.path.isfile('awslog.txt')):  
-  print('You do not have the file, beginning file download with urllib2...')
-  url = 'https://s3.amazonaws.com/tcmg476/http_access_log'
-  urllib.request.urlretrieve(url, 'awslog.txt')
-  print('File downloaded, resuming program.')
-# Opening aws log
+    print('You do not have the file, beginning file download with urllib2...')
+    url = 'https://s3.amazonaws.com/tcmg476/http_access_log'
+    urllib.request.urlretrieve(url, 'awslog.txt')
+    print('File downloaded, resuming program.')
+    
+# Opens and splits file
 file = open("awslog.txt","r")
-# Reading from file
-Content = file.read() 
-# Splitting list by new lines (each line is a different request)
-CoList = Content.split("\n")
-#closing it since we're done with it now
+
+read_file = file.read()
+biglist = read_file.split('\n')
+
 file.close()
 #i'm not testing to see if every file exists and then makign the ones that don't exist, if it doesn't see the first file it'll make all of them again
 #only opens the aws file if we need to work on it
@@ -40,7 +42,7 @@ if not(os.path.isfile('oct.txt')):
   txt12=open('sep.txt', 'w')
   txt13=open('oct1995.txt', 'w')
   #Making 13 files, I know you said 12 but two different octobers are taking place.
-  for i in CoList:
+  for i in biglist:
     if 'Oct/1994' in i:
       txt1.write(i + "\n")
     if 'Nov/1994' in i:
@@ -84,9 +86,6 @@ if not(os.path.isfile('oct.txt')):
   txt13.close()
 #we don't have to open read all of the txt files to do the rest of the assignment so...we won't! 
 #just going to use the big list we made rather then make like 13 different loops
-
-    
-
 monday = 0
 tuesday = 0
 wednesday = 0
@@ -95,13 +94,15 @@ friday = 0
 saturday = 0
 sunday = 0
 count = 0
+fourcode = 0
+threecode = 0
 regex = re.compile("(.*?) - - \[(.*?):(.*) .*\] \"[A-Z]{3,6} (.*?) HTTP.*\" (\d{3}) (.+)")  
-for i in CoList:
+for i in biglist:
   pieces = re.split(regex, i)
   if len(pieces) > 2: #some parts don't have proper requests, so they get this to sift through them
     count += 1
     date = d.datetime.strptime(pieces[2], '%d/%b/%Y')
-    day = d.datetime.weekday(date)
+    day = d.datetime.weekday(date) #this converts a day of the week to a value from 0-6, 0 being monday
     if day == 0:
       monday += 1
     if day == 1:
@@ -116,6 +117,12 @@ for i in CoList:
       saturday += 1
     if day == 6:
       sunday += 1
+    #section for code counting aka the 4xx and 3xx codes
+    code = pieces[5]
+    if code.startswith("4"):
+      fourcode += 1
+    if code.startswith("3"):
+      threecode += 1
 #52 mondays (or any unique day) in a year, but counting numbers down since we aren't doing EXACTLY a year
 monday = monday/50
 tuesday = tuesday/50
@@ -127,6 +134,8 @@ sunday = sunday/49
 dayaverage=(monday+tuesday+wednesday+thursday+friday+saturday+sunday)/7
 weekaverage=monday+tuesday+wednesday+thursday+friday+saturday+sunday
 monthaverage = count/12 #being lazy on this one
-print("There is a average of ", dayaverage, " requests for any given day.")
-print("There is a average of ", weekaverage, " requests for any given week.")
-print("There is a average of ", monthaverage, " requests for any given month.")
+print("There is a average of ", round(dayaverage, 2), " requests for any given day.")
+print("There is a average of ", round(weekaverage, 2), " requests for any given week.")
+print("There is a average of ", round(monthaverage, 2), " requests for any given month.")
+print("The percentage of requests that were not successful was ", round(((fourcode/count)*100),2),"%.")
+print("The percentage of requests that were redirected somewhere else was ", round(((threecode/count)*100), 2),"%.")
