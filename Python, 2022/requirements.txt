@@ -1,0 +1,4 @@
+Flask==2.1.0
+itsdangerous==2.0.1
+requests==2.7.0
+Redis
